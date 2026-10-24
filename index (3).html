@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f9eee4">
+<meta name="description" content="完成一題，砌一塊積木；勇敢改正，點亮自己的勇氣城堡。">
+<title>勇氣城堡 · Courage Castle</title>
+<style>
+:root{--ink:#614f69;--muted:#98869b;--cream:#fbf4e8;--shadow:0 16px 50px #8b6d8d29}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:"Arial Rounded MT Bold","Nunito","PingFang TC","Microsoft JhengHei",sans-serif;color:var(--ink)}
+body{background:radial-gradient(ellipse at 8% 2%,#ffe7d9,transparent 43%),radial-gradient(ellipse at 85% 0,#f0e2f4,transparent 40%),#f7f0e8}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.27;background-image:radial-gradient(#bd9fa1 0.5px,transparent 0.6px);background-size:8px 8px}
+button,input{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible{outline:3px solid #9584d8;outline-offset:3px}button:disabled{opacity:.45;cursor:not-allowed}
+.app{max-width:1270px;margin:0 auto;padding:19px 28px 30px;position:relative}
+.top{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:12px}
+.identity{display:flex;align-items:center;gap:13px}.logo{width:59px;height:59px;border-radius:18px;display:grid;place-items:center;font-size:30px;background:#f2d5c5;border:2px solid #d7adad;transform:rotate(-5deg);box-shadow:0 5px 0 #e2c2ba}
+h1{font-size:clamp(23px,3vw,33px);margin:0;line-height:1.12;letter-spacing:2px}header small{display:block;color:#a28ca4;font-size:11px;letter-spacing:1.8px;font-weight:900;margin-top:6px}
+.tools{display:flex;gap:8px}.tool{width:43px;height:43px;border-radius:14px;background:#fffaf0;border:1.5px solid #e8d7d0;box-shadow:0 4px 0 #e8d9d3;color:#866e89;font-size:20px}
+.progress{max-width:710px;margin:6px auto 14px;display:flex;align-items:center;gap:21px;justify-content:center}
+.count{white-space:nowrap;font-weight:900;display:flex;align-items:baseline;gap:6px}.count strong{font-size:45px;color:#785c82}.count span{font-size:25px;color:#ac9aaf}
+.progress-main{flex:1}.progress-label{font-weight:900;font-size:14px;margin-bottom:7px;color:#82718c}.bar{height:14px;border-radius:22px;background:#e5dbe9;overflow:hidden;border:2px solid #ded2e3}.barfill{height:100%;width:0;background:linear-gradient(90deg,#a0c6d9,#bda9d8,#dfaaca);border-radius:20px;transition:width .3s}.glowstat{text-align:right;font-size:12px;color:#a08c9d;margin-top:5px;font-weight:850}
+.stage{position:relative;height:min(56vw,505px);min-height:380px;border-radius:29px;overflow:hidden;border:4px solid #fff5e9;background:#fff1e3;box-shadow:0 8px 0 #e8d8ce,var(--shadow);isolation:isolate}
+.stage:after{content:"";position:absolute;inset:0;border:2px solid #fff9f0b8;border-radius:25px;pointer-events:none;z-index:4}
+#castleSvg{display:block;width:100%;height:100%}#bricks .brick{cursor:pointer}#bricks .brick.selected .face{stroke:#8264ae;stroke-width:4;stroke-dasharray:7 4}#bricks .brick.shining .face{stroke:#c28a38;stroke-width:2.5}
+#bricks .brick .shineAura,#bricks .brick .star{display:none}#bricks .brick.shining .shineAura,#bricks .brick.shining .star{display:block}
+#bricks .brick.shining .shineAura{animation:courage-glow 2.2s ease-in-out infinite alternate;animation-delay:var(--twinkle-delay,0s)}
+#bricks .brick.shining .star{filter:drop-shadow(0 0 3px #fff4a3);transform-box:fill-box;transform-origin:center;animation:courage-twinkle 2.4s ease-in-out infinite;animation-delay:var(--twinkle-delay,0s)}
+#bricks .brick .sparkle-points{display:none}#bricks .brick.shining .sparkle-points{display:block;animation:sparkle-flicker 2s ease-in-out infinite;animation-delay:var(--twinkle-delay,0s)}
+@keyframes courage-glow{from{opacity:.42}to{opacity:1}}
+@keyframes courage-twinkle{0%,100%{transform:scale(.88);opacity:.75}48%{transform:scale(1.24);opacity:1}70%{transform:scale(.98);opacity:.86}}
+@keyframes sparkle-flicker{0%,20%,100%{opacity:.25}42%{opacity:1}65%{opacity:.56}}
+.hint{position:absolute;top:15px;left:50%;transform:translateX(-50%);white-space:nowrap;background:#fffcf5e0;border:1px solid #f0e0d7;border-radius:30px;padding:10px 20px;color:#806b88;font-weight:900;font-size:13px;z-index:2;pointer-events:none}
+.toast{position:absolute;top:67px;left:50%;transform:translate(-50%,-13px);opacity:0;transition:all .22s;background:#fffaf3;color:#88688b;border:2px solid #edd3dd;box-shadow:0 8px 24px #77647624;border-radius:18px;padding:12px 20px;white-space:nowrap;font-weight:900;font-size:15px;z-index:11;pointer-events:none}.toast.show{opacity:1;transform:translate(-50%,0)}.toast.gold{color:#996c24;border-color:#edce87;background:#fff6dc}
+#fireworks{position:absolute;inset:0;width:100%;height:100%;z-index:9;pointer-events:none;display:none}
+.replay-celebration{position:absolute;right:22px;top:16px;z-index:12;border:2px solid #f0ce86;border-radius:30px;background:#fff8e0;color:#966626;padding:10px 17px;font-size:13px;font-weight:950;box-shadow:0 4px 0 #ddc293,0 8px 20px #79593425}
+.replay-celebration:hover{background:#fff0bd}.replay-celebration[hidden]{display:none}
+.control{display:flex;align-items:center;justify-content:center;gap:16px;margin:25px 0 0;flex-wrap:wrap}
+.bigbtn{min-width:235px;min-height:86px;display:flex;justify-content:center;align-items:center;gap:13px;border:0;border-radius:23px;padding:12px 22px;font-size:22px;font-weight:1000;color:#fff;box-shadow:0 7px 0 var(--edge),0 14px 24px #5b516324;transition:transform .15s}
+.bigbtn:hover:not(:disabled){transform:translateY(-2px)}.bigbtn:active:not(:disabled){transform:translateY(5px);box-shadow:0 2px 0 var(--edge)}
+.bigbtn .emoji{font-size:32px}.bigbtn small{display:block;font-size:12px;opacity:.88;margin-top:4px}.buildbtn{background:linear-gradient(130deg,#9dcde8,#679fc9);--edge:#5687ac}.shinebtn{background:linear-gradient(130deg,#f6ce87,#e6ac53);color:#6b5137;--edge:#b98b4d}
+.undobtn{border:2px solid #e5d6d8;border-radius:16px;color:#927b8f;background:#fff9f1;box-shadow:0 5px 0 #e6dad8;padding:14px 18px;font-size:15px;font-weight:900}.undobtn:active:not(:disabled){transform:translateY(4px)}
+footer{margin:24px 0 0;text-align:center;color:#a38f9f;font-weight:800;font-size:12px}footer span{color:#d4ae7b;margin:0 10px}
+.overlay{position:fixed;inset:0;z-index:30;display:grid;place-items:center;background:#59496681;backdrop-filter:blur(8px);padding:18px}.overlay.hidden{display:none}
+.dialog{width:min(480px,100%);max-height:92vh;overflow-y:auto;padding:28px 32px 30px;text-align:center;border-radius:32px;border:4px solid #fff;background:#fffaf1;box-shadow:0 14px 0 #e7d2c8,0 30px 75px #3024366e;position:relative}
+.dialog:before{content:"";position:absolute;inset:11px;border:2px dashed #e9d9cf;border-radius:23px;pointer-events:none}.dialog>*{position:relative}.dialog-art{font-size:69px;margin:0;line-height:1.3}
+.dialog h2{margin:10px 0;font-size:29px;line-height:1.3;color:#705b7d}.dialog p{font-size:15px;line-height:1.8;color:#99869b;margin:5px 0 18px}.dialog label{display:block;font-weight:900;margin-top:14px;margin-bottom:10px}
+.number-input{display:block;margin:0 auto;background:white;border:2px solid #dccbdf;color:#84678c;border-radius:16px;width:170px;text-align:center;font-size:31px;font-weight:900;padding:10px}
+.presets{display:flex;justify-content:center;gap:9px;margin:15px 0 12px}.preset{padding:9px 13px;background:#f6eaf1;border:1px solid #e1cfdf;color:#8d7492;border-radius:11px;font-weight:900}.preset.active{background:#d3b8da;color:white}
+.primary{width:100%;background:linear-gradient(120deg,#b393c4,#9371a5);color:white;border:0;border-radius:17px;box-shadow:0 6px 0 #7e618e;font-weight:900;font-size:18px;padding:14px 17px;margin-top:12px}
+.quiet{padding:12px;border:0;background:none;color:#9d879b;font-weight:900;margin-top:10px}.warn{font-size:12px;color:#b25c67;font-weight:900;min-height:15px}.success-tag{display:inline-block;background:#ffedc7;color:#a87936;border:1px solid #eecb86;padding:7px 15px;border-radius:30px;font-size:12px;font-weight:900}
+@media(max-width:720px){.app{padding:14px 10px 25px}.logo{height:47px;width:47px;font-size:26px;border-radius:14px}.identity{gap:10px}h1{font-size:23px}header small{font-size:9px;letter-spacing:1px}.tools{gap:5px}.tool{width:38px;height:38px}.progress{gap:12px;margin-bottom:12px}.count strong{font-size:34px}.count span{font-size:21px}.progress-label{font-size:12px}.glowstat{font-size:11px}.stage{height:50vh;min-height:355px;max-height:570px;border-radius:22px}.hint{font-size:11px;padding:8px 11px}.replay-celebration{top:auto;bottom:18px;right:12px;padding:9px 13px;font-size:12px}.control{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:21px}.bigbtn{min-width:0;min-height:80px;flex-direction:column;gap:4px;padding:8px 5px;font-size:17px;border-radius:18px}.bigbtn .emoji{font-size:25px}.bigbtn small{font-size:10px;margin-top:2px}.undobtn{grid-column:1/-1;justify-self:center;padding:11px 18px}footer{font-size:11px;margin-top:17px}.dialog{padding:23px 21px}}
+@media(max-width:380px){h1{font-size:20px}.logo{height:41px;width:41px}.tool{width:34px;height:34px}.bigbtn{font-size:16px}.stage{min-height:320px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<main class="app">
+ <header class="top">
+  <div class="identity"><div class="logo" aria-hidden="true">🏰</div><div><h1>勇氣城堡</h1><small>COURAGE CASTLE · 一磚一勇氣</small></div></div>
+  <div class="tools"><button id="sound" class="tool" title="音效" aria-label="音效">♫</button><button id="fullscreen" class="tool" title="全螢幕" aria-label="全螢幕">⛶</button><button id="settings" class="tool" title="新城堡" aria-label="新城堡">⚙</button></div>
+ </header>
+ <section class="progress"><div class="count" aria-live="polite"><strong id="current">0</strong><span>/</span><span id="goalText">100</span></div><div class="progress-main"><div class="progress-label" id="progressText">每一塊積木，都是你的努力 ✨</div><div class="bar"><div id="barfill" class="barfill"></div></div><div class="glowstat" id="shineText">閃亮勇氣積木 · 0 塊</div></div></section>
+ <section class="stage" id="stage"><div id="hint" class="hint">🌷 今天的努力，會開出美麗的花</div>
+  <svg id="castleSvg" viewBox="0 0 1000 650" preserveAspectRatio="xMidYMid meet" role="img" aria-label="正在建造的童話積木城堡">
+   <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#f9e5e1"/><stop offset=".65" stop-color="#fff1df"/><stop offset="1" stop-color="#d9e8df"/></linearGradient>
+    <linearGradient id="grass" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#c6d6ac"/><stop offset="1" stop-color="#8ebda1"/></linearGradient>
+    <linearGradient id="door"><stop stop-color="#b68c78"/><stop offset=".55" stop-color="#d2a78b"/><stop offset="1" stop-color="#ab806e"/></linearGradient>
+    <radialGradient id="aura"><stop stop-color="#ffe89b" stop-opacity=".65"/><stop offset="1" stop-color="#ffe89b" stop-opacity="0"/></radialGradient>
+    <pattern id="grain" width="23" height="23" patternUnits="userSpaceOnUse"><path d="M3 4l5 2m7 7-3 2M4 19l4-1" stroke="white" stroke-width="1.1" opacity=".28"/></pattern>
+   </defs>
+   <rect width="1000" height="650" fill="url(#sky)"/>
+   <g fill="#fffaf0" opacity=".7"><ellipse cx="130" cy="120" rx="111" ry="25"/><circle cx="92" cy="107" r="37"/><circle cx="157" cy="91" r="47"/><ellipse cx="842" cy="205" rx="100" ry="21"/><circle cx="808" cy="188" r="34"/><circle cx="864" cy="179" r="35"/></g>
+   <circle cx="824" cy="112" r="51" fill="#fff0c5" opacity=".77"/><circle cx="824" cy="112" r="73" fill="none" stroke="#fff6da" stroke-width="3" stroke-dasharray="3 17"/>
+   <path d="M0 440Q190 360 355 440T735 425Q880 350 1000 423V650H0Z" fill="#e0e7d1"/>
+   <path d="M0 488Q200 417 360 495T745 477Q880 450 1000 486V650H0Z" fill="#bcd5b9"/>
+   <path d="M0 563Q230 522 420 561T1000 553V650H0Z" fill="url(#grass)"/>
+   <path d="M0 615Q265 573 500 608T1000 595" stroke="#8fb998" stroke-width="5" fill="none" opacity=".55"/>
+   <g id="flowers"></g>
+   <ellipse cx="500" cy="571" rx="330" ry="32" fill="#557b7750"/>
+   <path d="M179 566Q502 538 821 566" stroke="#eadbc0" stroke-width="17" fill="none" stroke-linecap="round"/>
+   <g id="doorRear"></g><g id="bricks"></g><g id="castleTrim"></g>
+  </svg>
+  <canvas id="fireworks"></canvas><button id="replayCelebration" class="replay-celebration" hidden>🎆 再放煙花</button><div id="toast" class="toast" role="status" aria-live="polite"></div>
+ </section>
+ <section class="control">
+  <button id="add" class="bigbtn buildbtn"><span class="emoji">🧱</span><span>完成一題<small>為城堡加一塊積木</small></span></button>
+  <button id="shine" class="bigbtn shinebtn"><span class="emoji">✨</span><span>勇敢改正<small>點亮一塊已有積木</small></span></button>
+  <button id="undo" class="undobtn">↶ &nbsp; 復原上一步</button>
+ </section>
+ <footer>一題一積木 <span>✦</span> 改正會發光 <span>✦</span> 每一次努力都值得被看見</footer>
+</main>
+<div class="overlay" id="overlay"><div class="dialog" id="dialog" role="dialog" aria-modal="true"></div></div>
+<script>
+(()=>{'use strict';
+const KEY='courage-castle-save-v1', $=id=>document.getElementById(id), NS='http://www.w3.org/2000/svg';
+const colors=['#DFA8AF','#90B9D6','#D8B7D8','#B5CCAB','#E8BF8A','#B9CADE','#EAC7A7','#D7B9C5'];
+const msgs=['又完成一題！','城堡長大了！','你正在慢慢進步！','努力可以一塊一塊累積！','每一塊積木都很重要！'];
+const courageMsgs=['勇敢改正，真了不起！','改正也是一種進步！','你有面對錯誤的勇氣！','願意再試一次，就是勇氣！'];
+const reduced=matchMedia('(prefers-reduced-motion: reduce)');
+let state={target:100,seed:2026,history:[],sound:true},slots=[],placed=[],lit=new Set(),selected=null,busy=false,toastTimer,fireFrame,audioCtx;
+function rand(i,s=0){let x=(Math.imul(i+13,374761393)+Math.imul(state.seed,668265263)+s)>>>0;x=Math.imul(x^(x>>>13),1274126177);return ((x^(x>>>16))>>>0)/4294967296;}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify({...state,version:1}));}catch(e){message('暫時無法儲存，請檢查瀏覽器設定');}}
+function restore(){try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(!s||s.version!==1||!Number.isInteger(s.target)||s.target<1||s.target>500||!Array.isArray(s.history)||s.history.length>1200)return false;state={target:s.target,seed:Number.isInteger(s.seed)?s.seed:2026,history:s.history,sound:s.sound!==false};makeSlots();replay();return true;}catch(e){return false;}}
+function split(n,weights){const vals=weights.map(w=>w*n),nums=vals.map(Math.floor);let remain=n-nums.reduce((a,b)=>a+b,0);vals.map((v,i)=>({i,d:v-nums[i]})).sort((a,b)=>b.d-a.d).slice(0,remain).forEach(o=>nums[o.i]++);return nums;}
+function makeSection(box,count){if(!count)return[];const {x,y,w,h,section}=box;const rows=Math.max(1,Math.min(count,Math.round(Math.sqrt(1.5*count*h/w))));const q=Math.floor(count/rows),extra=count%rows,arr=[];for(let r=0;r<rows;r++){let cols=q+(r<extra?1:0);for(let c=0;c<cols;c++){const bw=w/cols,bh=h/rows;arr.push({x:x+c*bw,y:y+h-(r+1)*bh,w:bw,h:bh,section});}}return arr;}
+function makeSlots(){const n=state.target;let list=[];if(n<12){const w=n===1?140:245,h=n===1?115:190;list=makeSection({x:500-w/2,y:550-h,w,h,section:'mini'},n);}else{const parts=[{x:215,y:255,w:129,h:294,section:'leftTower'},{x:656,y:255,w:129,h:294,section:'rightTower'},{x:345,y:423,w:110,h:126,section:'leftWing'},{x:545,y:423,w:110,h:126,section:'rightWing'},{x:345,y:353,w:310,h:70,section:'topWall'},{x:433,y:292,w:134,h:61,section:'keep'}];const counts=split(n,[.222,.222,.134,.134,.174,.114]);parts.forEach((p,i)=>list.push(...makeSection(p,counts[i])));list.sort((a,b)=>b.y-a.y||Math.abs(a.x-500)-Math.abs(b.x-500));}
+slots=list.map((p,i)=>({...p,i,color:colors[Math.floor(rand(i,7)*colors.length)]}));}
+function replay(){placed=[];lit=new Set();let valid=[];for(const e of state.history){if(!e||!Number.isInteger(e.slot))continue;if(e.type==='add'&&e.slot===placed.length&&placed.length<state.target){placed.push(e.slot);valid.push({type:'add',slot:e.slot});}if(e.type==='shine'&&placed.includes(e.slot)&&!lit.has(e.slot)){lit.add(e.slot);valid.push({type:'shine',slot:e.slot});}}state.history=valid;}
+function isDone(){return placed.length===state.target;}
+function htmlStar(x,y,r){let p=[];for(let j=0;j<10;j++){let a=-Math.PI/2+j*Math.PI/5,rr=j%2?r*.47:r;p.push(`${x+Math.cos(a)*rr},${y+Math.sin(a)*rr}`);}return `<polygon points="${p.join(' ')}" fill="#fff8d3" stroke="#ba9c59" stroke-width="1.2"/>`;}
+function shade(hex,f){return '#'+[1,3,5].map(i=>Math.max(0,Math.min(255,Math.round(parseInt(hex.slice(i,i+2),16)*f))).toString(16).padStart(2,'0')).join('');}
+function brickHTML(b,glowing){let {x,y,w,h,color}=b,col=glowing?'#F0CA76':color,edge=shade(col,.8),hi=shade(col,1.12),side=Math.min(7,Math.max(2,w*.09)),r=Math.min(5,h*.17),spark=Math.max(2,Math.min(w,h)*.13),cx=x+w*.72,cy=y+h*.27;return `<ellipse class="shineAura" cx="${x+w/2}" cy="${y+h/2}" rx="${w*.91}" ry="${h*1.12}" fill="url(#aura)"/><rect x="${x+1}" y="${y+3}" width="${w-1}" height="${h-2}" rx="${r}" fill="${edge}"/><rect class="face" x="${x+1}" y="${y+1}" width="${w-side-2}" height="${h-4}" rx="${r}" fill="${col}" stroke="${edge}" stroke-width="1.5"/><path d="M${x+4} ${y+Math.min(7,h*.22)}Q${x+w*.48} ${y+1} ${x+w-side-4} ${y+Math.min(7,h*.2)}" fill="none" stroke="${hi}" stroke-width="2" opacity=".7" stroke-linecap="round"/><path d="M${x+w-side-1} ${y+3}l${side} 1v${h-6}l-${side} 2z" fill="${edge}" opacity=".85"/><rect x="${x+3}" y="${y+3}" width="${Math.max(0,w-side-5)}" height="${Math.max(0,h-7)}" fill="url(#grain)" rx="${r}"/><g class="star">${htmlStar(x+w/2,y+h/2,Math.min(w,h)*.26)}</g><g class="sparkle-points" stroke="#fff9df" stroke-width="${Math.max(1,spark*.18)}" stroke-linecap="round"><path d="M${cx-spark} ${cy}h${spark*2}M${cx} ${cy-spark}v${spark*2}"/><circle cx="${x+w*.28}" cy="${y+h*.72}" r="${Math.max(1,spark*.23)}" fill="#fffdf0" stroke="none"/></g>`;}
+function plantFlowers(){const layer=$('flowers');let content='';for(let i=0;i<40;i++){let x=30+rand(i,121)*940,y=565+rand(i,221)*65;if(x>200&&x<805&&y<590)continue;let r=3+rand(i,321)*3.2,c=['#edb8c6','#eedba9','#cabade','#fff1d0'][i%4];content+=`<path d="M${x} ${y+13}q2-10 0-18" stroke="#8eb795" stroke-width="2" fill="none"/>`;for(let j=0;j<5;j++){let a=j*Math.PI*2/5;content+=`<circle cx="${x+Math.cos(a)*r*.63}" cy="${y+Math.sin(a)*r*.63}" r="${r*.57}" fill="${c}"/>`;}content+=`<circle cx="${x}" cy="${y}" r="${r*.37}" fill="#d9aa78"/>`;}layer.innerHTML=content;}
+function sectionDone(name){const arr=slots.filter(x=>x.section===name);return arr.length>0&&arr.every(x=>placed.includes(x.i));}
+function renderDecor(){let rear='',trim='';if(placed.length&&state.target<12&&placed.length/state.target>=.7){const left=Math.min(...slots.map(s=>s.x)),right=Math.max(...slots.map(s=>s.x+s.w)),top=Math.min(...slots.map(s=>s.y)),mid=(left+right)/2,peak=top-Math.min(86,(right-left)*.35);trim+=`<path d="M${left-9} ${top+2}L${mid} ${peak}L${right+9} ${top+2}Z" fill="#c6abc4" stroke="#a088af" stroke-width="5" stroke-linejoin="round"/><path d="M${mid} ${peak}v-24" stroke="#9c7c83" stroke-width="3"/><path d="M${mid+1} ${peak-24}l30 9-30 12z" fill="#e5b692" stroke="#b99083" stroke-width="2"/>`;}if(state.target>=12){
+for(const [name,x] of [['leftTower',279.5],['rightTower',720.5]])if(sectionDone(name))trim+=`<path d="M${x-77} 255 ${x} 171 ${x+77} 255Z" fill="#c9adc5" stroke="#aa87a6" stroke-width="5"/><path d="M${x} 170v-29" stroke="#967b83" stroke-width="4"/><path d="M${x+1} 141l37 10-37 14z" fill="#e5b393" stroke="#bb8f80" stroke-width="2"/><path d="M${x-46} 236 ${x} 185 ${x+46} 236" fill="none" stroke="#e9cddd" stroke-width="3"/>`;
+if(sectionDone('keep'))trim+='<path d="M430 292 500 241 570 292Z" fill="#b8c8dd" stroke="#8eacc1" stroke-width="5"/><path d="M500 241v-27" stroke="#937e85" stroke-width="4"/><path d="M502 214l39 11-39 14z" fill="#f0cc8b" stroke="#bca06b" stroke-width="2"/>';
+if(sectionDone('leftWing')&&sectionDone('rightWing')&&sectionDone('topWall'))trim+='<path d="M455 551V466a45 45 0 0 1 90 0v85Z" fill="url(#door)" stroke="#906f67" stroke-width="5"/><path d="M500 427v124" stroke="#8a6d68" stroke-width="3"/><circle cx="488" cy="510" r="4" fill="#f8df8f"/><circle cx="512" cy="510" r="4" fill="#f8df8f"/>';
+}
+if(isDone())trim+=`<g opacity=".9">${htmlStar(500,108,14)}${htmlStar(152,307,9)}${htmlStar(846,310,10)}</g>`;
+$('doorRear').innerHTML=rear;$('castleTrim').innerHTML=trim;}
+function render(){renderDecor();const layer=$('bricks');layer.innerHTML='';for(const i of placed){const b=slots[i],glow=lit.has(i);const g=document.createElementNS(NS,'g');g.setAttribute('class',`brick ${glow?'shining':''} ${selected===i?'selected':''}`);g.style.setProperty('--twinkle-delay',`${-(i%9)*.29}s`);g.dataset.slot=i;g.innerHTML=brickHTML(b,glow);g.addEventListener('click',()=>{if(busy||glow)return;selected=selected===i?null:i;render();message(selected===null?'已取消選取':'已選好這塊積木，按「勇敢改正」讓它發光 ✨');});layer.appendChild(g);}
+$('current').textContent=placed.length;$('goalText').textContent=state.target;$('barfill').style.width=`${placed.length/state.target*100}%`;$('shineText').textContent=`閃亮勇氣積木 · ${lit.size} 塊`;$('progressText').textContent=isDone()?'🎊 勇氣城堡建造完成！':placed.length?'每一塊積木，都是你的努力 ✨':'從第一塊積木開始，慢慢建造吧！';$('hint').textContent=isDone()?'🌟 努力和勇氣，建成一座漂亮城堡！':placed.length/state.target>.75?'🌈 就快完成了，繼續加油！':placed.length/state.target>.4?'🦋 一塊一塊，城堡正在長大！':'🌷 今天的努力，會開出美麗的花';$('add').disabled=busy||isDone();$('shine').disabled=busy||placed.length===lit.size;$('undo').disabled=busy||!state.history.length;$('sound').textContent=state.sound?'♫':'♪';$('replayCelebration').hidden=!isDone();}
+function message(text,gold=false){clearTimeout(toastTimer);const t=$('toast');t.className=`toast show${gold?' gold':''}`;t.textContent=text;toastTimer=setTimeout(()=>t.classList.remove('show'),1850);}
+function sound(kind){if(!state.sound)return;try{const Context=window.AudioContext||window.webkitAudioContext;if(!Context)return;audioCtx??=new Context();if(audioCtx.state==='suspended')audioCtx.resume();const freqs=kind==='add'?[330,392]:kind==='shine'?[523,659,784]:[392,523,659,784,1047];freqs.forEach((freq,i)=>{const t=audioCtx.currentTime+i*.09,o=audioCtx.createOscillator(),v=audioCtx.createGain();o.type=kind==='add'?'triangle':'sine';o.frequency.value=freq;v.gain.setValueAtTime(.0001,t);v.gain.exponentialRampToValueAtTime(.05,t+.025);v.gain.exponentialRampToValueAtTime(.0001,t+.3);o.connect(v).connect(audioCtx.destination);o.start(t);o.stop(t+.32);});}catch(e){}}
+async function animate(slot,type){if(reduced.matches)return;const node=document.querySelector(`[data-slot="${slot}"]`);if(!node)return;let frames,duration;if(type==='add'){frames=[{opacity:0,transform:'translateY(170px) scale(.7)'},{opacity:1,transform:'translateY(-12px) scale(1.05)',offset:.8},{opacity:1,transform:'translateY(0) scale(1)'}];duration=680;}else{frames=[{filter:'brightness(1)',transform:'scale(1)'},{filter:'brightness(1.45) drop-shadow(0 0 16px #ffda71)',transform:'scale(1.12)',offset:.45},{filter:'brightness(1)',transform:'scale(1)'}];duration=1000;}try{await node.animate(frames,{duration,easing:'ease-out'}).finished;}catch(e){}}
+async function action(type){if(busy)return;let slot;if(type==='add'){if(isDone())return;slot=placed.length;}else{const available=placed.filter(i=>!lit.has(i));if(!available.length)return;slot=selected!==null&&available.includes(selected)?selected:available[available.length-1];}
+busy=true;selected=null;state.history.push({type,slot});replay();persist();render();sound(type);message(type==='add'?msgs[Math.floor(Math.random()*msgs.length)]:courageMsgs[Math.floor(Math.random()*courageMsgs.length)],type==='shine');await Promise.race([animate(slot,type),new Promise(resolve=>setTimeout(resolve,type==='add'?1000:1300))]);busy=false;render();if(type==='add'&&isDone())setTimeout(()=>{if(isDone())celebrate();},180);}
+async function undo(){if(busy||!state.history.length)return;busy=true;const old=state.history.pop();selected=null;replay();persist();render();message(old.type==='shine'?'已取消剛才的光芒':'已取回上一塊積木');await new Promise(r=>setTimeout(r,reduced.matches?0:170));busy=false;render();}
+function dialog(html){$('dialog').innerHTML=html;$('overlay').classList.remove('hidden');}
+function closeDialog(){$('overlay').classList.add('hidden');}
+function newDialog(restart=false){dialog(`<div class="dialog-art">🏰</div><h2>${restart?'建造一座新城堡？':'歡迎來到勇氣城堡'}</h2><p>${restart?'重新開始將清除現在的建造進度，請先確認。':'每完成一題，增加一塊積木。<br>勇敢改正，讓已有的積木閃閃發亮 ✨'}</p><label for="goalInput">這次想用多少塊積木？</label><input class="number-input" id="goalInput" type="number" inputmode="numeric" min="1" max="500" step="1" value="${state.target}"><div class="presets">${[20,50,100,200].map(n=>`<button class="preset ${n===state.target?'active':''}" data-n="${n}">${n}</button>`).join('')}</div><div class="warn" id="error"></div><button class="primary" id="start">${restart?'確定，開始新城堡':'🏰 開始建造城堡'}</button>${restart?'<button class="quiet" id="cancel">取消，繼續建造</button>':''}`);
+document.querySelectorAll('[data-n]').forEach(b=>b.onclick=()=>{$('goalInput').value=b.dataset.n;document.querySelectorAll('[data-n]').forEach(x=>x.classList.toggle('active',x===b));});
+$('start').onclick=()=>{const raw=$('goalInput').value.trim(),n=Number(raw);if(!raw||!Number.isInteger(n)||n<1||n>500){$('error').textContent='請輸入 1 至 500 的整數';return;}stopFireworks();state.target=n;state.seed=Math.floor(Math.random()*2e9);state.history=[];selected=null;makeSlots();replay();persist();render();closeDialog();message('第一塊積木，準備出發吧！🌟');};
+if(restart)$('cancel').onclick=closeDialog;}
+function resumeDialog(){dialog(`<div class="dialog-art">🏰</div><h2>歡迎回來！</h2><p>已經建造 <b>${placed.length}</b> 塊積木<br>有 <b>${lit.size}</b> 塊閃亮的勇氣積木 ✨</p><button class="primary" id="resume">${isDone()?'欣賞我的城堡':'繼續建造城堡'}</button><button class="quiet" id="new">開始一座新城堡</button>`);$('resume').onclick=closeDialog;$('new').onclick=()=>newDialog(true);}
+function completeDialog(){dialog(`<div class="dialog-art">🎊🏰</div><div class="success-tag">✦ 小小建築師 · 大大勇氣 ✦</div><h2>勇氣城堡建造完成！</h2><p>你用努力和勇氣，建造了自己的城堡！<br><b>${state.target}</b> 塊積木，每一塊都有你的故事。<br>✨ 其中 <b>${lit.size}</b> 塊勇氣積木在發光</p><button class="primary" id="admire">🏰 欣賞我的城堡</button><button class="quiet" id="replay">🎆 再看一次煙花</button><button class="quiet" id="new">建造新城堡</button>`);$('admire').onclick=closeDialog;$('replay').onclick=()=>{closeDialog();celebrate(true);};$('new').onclick=()=>newDialog(true);}
+function stopFireworks(){if(fireFrame)cancelAnimationFrame(fireFrame);fireFrame=null;$('fireworks').style.display='none';}
+function celebrate(repeat=false){stopFireworks();if(reduced.matches){message('🎆 你成功建造了勇氣城堡！');if(!repeat)completeDialog();return;}const canvas=$('fireworks');canvas.style.display='block';const rect=$('stage').getBoundingClientRect(),ctx=canvas.getContext('2d'),dpr=Math.min(2,devicePixelRatio||1);if(!ctx||rect.width<=0||rect.height<=0){stopFireworks();if(!repeat)completeDialog();return;}canvas.width=Math.round(rect.width*dpr);canvas.height=Math.round(rect.height*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);sound('win');const points=[];let start=performance.now(),last=-1;function burst(){let x=rect.width*(.18+Math.random()*.64),y=rect.height*(.08+Math.random()*.34),c=['#ed5c99','#ffc74b','#9c70e8','#56c6a5','#69b7ed'][Math.floor(Math.random()*5)];for(let j=0;j<64;j++){let a=j*2*Math.PI/64,v=1.5+Math.random()*4.3;points.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:1,color:c,size:2+Math.random()*2.7});}}
+function frame(now){let t=now-start;ctx.clearRect(0,0,rect.width,rect.height);if(Math.floor(t/720)>last&&t<7900){burst();last=Math.floor(t/720);}for(let i=points.length-1;i>=0;i--){let p=points[i];p.x+=p.vx;p.y+=p.vy;p.vy+=.042;p.life-=.012;ctx.globalAlpha=Math.max(0,p.life);ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,Math.max(.1,p.size*p.life),0,Math.PI*2);ctx.fill();if(p.life<=0)points.splice(i,1);}ctx.globalAlpha=1;if(t<9500)fireFrame=requestAnimationFrame(frame);else{stopFireworks();if(!repeat)completeDialog();}}
+fireFrame=requestAnimationFrame(frame);}
+function responsive(){const mobile=matchMedia('(max-width:720px)').matches;$('castleSvg').setAttribute('viewBox',mobile?'160 100 680 510':'0 105 1000 470');$('castleSvg').setAttribute('preserveAspectRatio',mobile?'xMidYMid meet':'xMidYMid slice');}
+$('add').onclick=()=>action('add');$('shine').onclick=()=>action('shine');$('undo').onclick=undo;$('replayCelebration').onclick=()=>celebrate(true);$('settings').onclick=()=>{if(!busy)newDialog(true);};$('sound').onclick=()=>{state.sound=!state.sound;persist();render();if(state.sound)sound('add');};$('fullscreen').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();}catch(e){message('這個瀏覽器暫不支援全螢幕');}};addEventListener('resize',responsive);
+plantFlowers();const found=restore();if(!found){makeSlots();replay();}responsive();render();if(found)resumeDialog();else newDialog();
+})();
+</script>
+</body>
+</html>
