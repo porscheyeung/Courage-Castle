@@ -370,7 +370,7 @@ function doAction(evt) {
   else if (evt.type === 'extra') say('你的勇氣王國又多一道風景！');
   setTimeout(() => {
     newest = ''; newWindow = ''; newLamp = -1; busy = false; render();
-    if (evt.type === 'shine') noteDialog(evt.id, true);
+    if (evt.type === 'shine') celebrateShine(evt.id);
     else if (evt.type === 'add' && V.complete) fireworks('castle');
     else if (evt.type === 'extra' && V.extra.length % 20 === 0) say('🎉 一個新區域建成了！', { gold: true });
   }, reduced.matches ? 80 : 760);
@@ -393,20 +393,25 @@ function undo() {
   say(e.type === 'shine' ? '已收起剛才那盞燈。' : '已復原上一步建造。');
 }
 function shineEvent(id) { return state.history.find((e) => e.type === 'shine' && e.id === id); }
-function noteDialog(id, fresh) {
-  const e = shineEvent(id); if (!e) return;
+function celebrateShine(id) {
   const d = E.diary(state, V).find((x) => x.id === id), g = E.garland(lampsOn());
-  const done = fresh && g.lamps === 0;
+  if (!d) return;
+  const write = ['✏️ 寫日記', () => noteDialog(id)];
+  if (g.lamps === 0) { music('garland'); say(`🎉 第 ${g.done} 串勇氣燈掛好了！`, { gold: true, action: write }); }
+  else say(`✦ ${courage[d.n % courage.length]} ${d.resident.name}搬進來了。`, { gold: true, action: write });
+}
+function noteDialog(id) {
+  const e = shineEvent(id); if (!e) return;
+  const d = E.diary(state, V).find((x) => x.id === id);
   dialog(`<div class="dialog-art">${faces[d.resident.id]}</div>
- ${fresh ? `<div class="success-tag">✦ ${courage[d.n % courage.length]} ✦</div>` : ''}
- <h2>${fresh ? `${esc(d.resident.name)}搬進第 ${d.no} 塊積木` : `第 ${d.no} 塊積木的小紙條`}</h2>
- <p>${fresh ? `${esc(d.resident.line)}<br>${done ? `🎉 第 ${g.done} 串勇氣燈掛好了！` : `勇氣燈串：第 ${g.current} 串 ${g.lamps}/${E.LAMPS} 盞`}` : '寫下這次學到甚麼，下次就記得了。'}</p>
+ <h2>第 ${d.no} 塊積木的小紙條</h2>
+ <p>想寫就寫，不寫也可以。</p>
  <label for="noteText">這次學到甚麼？（可以略過）</label>
  <textarea id="noteText" class="note-input" maxlength="${E.NOTE_MAX}" placeholder="例如：要先看清楚單位">${esc(e.note || '')}</textarea>
  <div class="note-count"><span id="noteCount">${(e.note || '').length}</span>/${E.NOTE_MAX}</div>
  <div class="chips">${noteIdeas.map((t) => `<button data-idea="${t}">${t}</button>`).join('')}</div>
  <button class="primary" id="saveNote">📒 放進勇氣日記</button>
- <button class="quiet" id="skipNote">${fresh ? '下次再寫' : '取消'}</button>`);
+ <button class="quiet" id="skipNote">取消</button>`);
   const box = $('noteText'), count = () => { $('noteCount').textContent = box.value.length; };
   box.oninput = count;
   document.querySelectorAll('[data-idea]').forEach((b) => b.onclick = () => {
@@ -416,15 +421,9 @@ function noteDialog(id, fresh) {
     const note = E.clean(box.value, E.NOTE_MAX);
     if (note) e.note = note; else delete e.note;
     persist(); closeDialog(); render();
-    if (done) { music('garland'); say(`🎉 第 ${g.done} 串勇氣燈掛好了！`, { gold: true }); }
-    else say(note ? '📒 已放進勇氣日記。點一下亮著的積木就能重溫。' : '燈已經亮了，紙條隨時可以補寫。', { gold: !!note });
+    say(note ? '📒 已放進勇氣日記。點一下亮著的積木就能重溫。' : '紙條已清空，隨時可以再寫。', { gold: !!note });
   };
-  $('skipNote').onclick = () => {
-    closeDialog();
-    if (!fresh) return;
-    if (done) { music('garland'); say(`🎉 第 ${g.done} 串勇氣燈掛好了！`, { gold: true }); }
-    else say('燈已經亮了！想補寫紙條時，點一下那塊亮著的積木。', { gold: true, action: ['✏️ 現在寫', () => noteDialog(id, false)] });
-  };
+  $('skipNote').onclick = () => closeDialog();
   if (!isPhone()) setTimeout(() => box.focus({ preventScroll: true }), 60);
 }
 
@@ -437,7 +436,7 @@ function showBubble(id) {
   if (isPhone()) {
     // 手機畫面細，紙條放在城堡下面的訊息欄，不蓋住城堡。
     node.classList.remove('patrol-twinkle'); void node.getBoundingClientRect(); node.classList.add('patrol-twinkle');
-    say(`${faces[d.resident.id]} 第 ${d.no} 塊 · ${date}：${d.note ? `「${d.note}」` : `${d.resident.name}住在這裏，還沒有小紙條。`}`, { gold: true, action: [d.note ? '✏️ 修改' : '✏️ 寫下', () => noteDialog(id, false)] });
+    say(`${faces[d.resident.id]} 第 ${d.no} 塊 · ${date}：${d.note ? `「${d.note}」` : `${d.resident.name}住在這裏，還沒有小紙條。`}`, { gold: true, action: [d.note ? '✏️ 修改' : '✏️ 寫下', () => noteDialog(id)] });
     $('say').scrollIntoView({ block: 'nearest', behavior: reduced.matches ? 'auto' : 'smooth' });
     return;
   }
@@ -448,7 +447,7 @@ function showBubble(id) {
  <div class="b-row"><button id="bEdit">${d.note ? '✏️ 修改' : '✏️ 寫下學到甚麼'}</button></div>`;
   b.hidden = false;
   b.querySelector('.b-x').onclick = hideBubble;
-  $('bEdit').onclick = () => noteDialog(id, false);
+  $('bEdit').onclick = () => noteDialog(id);
   const st = $('stage').getBoundingClientRect(), r = node.getBoundingClientRect(), bw = b.offsetWidth, bh = b.offsetHeight;
   let x = E.clamp(r.left + r.width / 2 - st.left - bw / 2, 12, st.width - bw - 12);
   let y = r.top - st.top - bh - 10;
@@ -539,7 +538,7 @@ function diaryDialog(filter = 'notes') {
  <button class="quiet" id="dClose">返回城堡</button>`);
   document.querySelectorAll('[data-f]').forEach((b) => b.onclick = () => diaryDialog(b.dataset.f));
   document.querySelectorAll('[data-see]').forEach((b) => b.onclick = () => { closeDialog(); focusOn(b.dataset.see); });
-  document.querySelectorAll('[data-edit]').forEach((b) => b.onclick = () => noteDialog(b.dataset.edit, false));
+  document.querySelectorAll('[data-edit]').forEach((b) => b.onclick = () => noteDialog(b.dataset.edit));
   if ($('printDiary')) $('printDiary').onclick = printDiary;
   $('dClose').onclick = closeDialog;
 }
@@ -643,7 +642,7 @@ function whatsNewDialog() {
  <li>🗺️ <b>城堡藍圖</b>：虛線預告完整城堡，「＋」是下一塊積木。</li>
  <li>💡 <b>勇氣燈串</b>：每改正 ${E.LAMPS} 次，就有一串燈掛到城堡上。</li>
  <li>🌙 <b>夜景</b>：亮著的積木變成窗，窗後住著小住客。</li>
- <li>📒 <b>勇氣日記</b>：改正後寫下學到甚麼，點亮著的積木就能重溫。</li>
+ <li>📒 <b>勇氣日記</b>：不用每次都寫；想記下學到甚麼時，按「寫日記」或點亮著的積木就可以。</li>
  <li>🛡️ <b>提燈小騎士</b>：點牠一下，牠會去巡邏亮著的窗。</li>
  <li>🎬 <b>建造回放</b>：由第一塊積木開始重看整座城堡。</li>
  </ul>

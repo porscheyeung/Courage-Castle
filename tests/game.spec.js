@@ -47,6 +47,10 @@ test('首次使用：建城、改正寫紙條、氣泡、日記、復原、重�
   await clickBrick(page, 'c1');
   await expect(page.locator('[data-oid="c1"]')).toHaveClass(/object-selected/);
   await page.click('#shine');
+  await expect(page.locator('#sayAction')).toHaveText('✏️ 寫日記');
+  await expect(page.locator('#noteText')).toHaveCount(0);
+  expect((await saved(page)).history.at(-1).note).toBeUndefined();
+  await page.click('#sayAction');
   await expect(page.locator('#noteText')).toBeVisible();
   await page.click('[data-idea="單位要寫"]');
   await page.click('#saveNote');
@@ -69,8 +73,8 @@ test('首次使用：建城、改正寫紙條、氣泡、日記、復原、重�
   await page.click('#dClose');
 
   await page.click('#shine');
-  await page.click('#skipNote');
-  await expect(page.locator('#sayAction')).toHaveText('✏️ 現在寫');
+  await expect(page.locator('#sayAction')).toHaveText('✏️ 寫日記');
+  await expect(page.locator('#dialog')).toBeHidden();
   await page.click('#undo');
   await expect(page.locator('#lampText')).toHaveText('💡 1 盞');
   await page.reload();
@@ -91,7 +95,7 @@ test('舊存檔升級：保留進度、另存備份，舊版 V2.3 仍可讀寫',
   expect(await page.evaluate((k) => localStorage.getItem(k), E.SNAP_KEY)).toBe(raw);
   await page.click('#go');
   expect(await snap(page)).toMatchObject({ built: 12, lit: 4 });
-  await page.click('#shine'); await page.fill('#noteText', '要檢查'); await page.click('#saveNote');
+  await page.click('#shine'); await page.click('#sayAction'); await page.fill('#noteText', '要檢查'); await page.click('#saveNote');
   await page.reload();
   await expect(page.locator('#dialog h2')).toContainText('歡迎回來');
 
