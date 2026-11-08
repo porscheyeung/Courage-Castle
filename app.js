@@ -141,7 +141,7 @@ function garlands(o) {
   return `<g id="garlands">${posts}${wires}${bulbs}</g>`;
 }
 function knight(o) {
-  return `<g id="knight" transform="translate(328 604)" role="button" aria-label="提燈小騎士"><g class="knight-bob">
+  return `<g id="knight" transform="translate(214 610)" role="button" aria-label="提燈小騎士"><g class="knight-bob">
  <ellipse cx="2" cy="1" rx="23" ry="5" fill="#000" opacity=".16"/>
  <path d="M-12 -30Q-30 -12 -20 -2L-4 -6Z" fill="#e88fa6" stroke="#c97489" stroke-width="1.5"/>
  <rect x="-10" y="-6" width="8" height="7" rx="3" fill="#7f8fa8"/><rect x="3" y="-6" width="8" height="7" rx="3" fill="#7f8fa8"/>
