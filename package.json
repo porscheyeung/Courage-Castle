@@ -1,0 +1,13 @@
+{
+  "name": "courage-castle",
+  "version": "1.0.0",
+  "private": true,
+  "description": "勇氣城堡：一題一積木，改正亮一盞燈",
+  "scripts": {
+    "test": "node --test tests/engine.test.js && playwright test",
+    "start": "python3 -m http.server 4189 --bind 127.0.0.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1"
+  }
+}
