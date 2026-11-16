@@ -11,3 +11,9 @@
 - 內容須符合使用者的基督教信仰：不用星座、門神、金剛等占星或其他宗教用語。文案用繁體中文、鼓勵語氣。
 
 修改後執行 `npm test`，檢查手機及桌面截圖，更新 docs/TEST-RESULTS.md。不要提交 node_modules 或 test-results。
+
+## 勇氣寶庫（reward.html，2026-11-16）
+- 規則只改 `reward/reward-engine.js`（純函數、回傳新 state），介面 `reward/reward-app.js`。存檔 `courage-reward-v1`；城堡抽獎券以 `seed:target` 記在 `claimed`，城堡 app.js 的 `rewardWaiting()` 用同一格式顯示 🎁 紅點，兩邊要一致。
+- 寶庫只讀城堡存檔，絕不寫入 `courage-castle-save-v2`。
+- 視覺參考課堂冒險局遊戲卡；插畫在 `reward/art/`（提示詞見 PROMPTS.md）。不要把 header 返回鍵命名為 `.back`（會撞卡背 `.face.back`）。
+- `?test` 開放 `window.__rw`（state、setRng、reload）。軟件渲染的 WebKit 跑完整開箱動畫偶爾崩潰，iPhone 測試故此關動畫只驗版面；完整動畫在 Chromium 測試。

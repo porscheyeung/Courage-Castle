@@ -307,7 +307,18 @@ function render() {
   $('finish').hidden = !V.complete || state.finalized;
   $('replayCelebration').hidden = !V.complete || !!replaying;
   $('sound').textContent = state.sound ? '♫' : '♪';
+  const unclaimed = rewardWaiting();
+  $('rewardDot').hidden = !unclaimed;
+  $('rewardLink').classList.toggle('glow', unclaimed);
   renderStats();
+}
+// 勇氣寶庫（reward.html）用同一個 seed:target 記錄這座城堡的抽獎券是否已發出。
+function rewardWaiting() {
+  if (!V.complete) return false;
+  try {
+    const r = JSON.parse(localStorage.getItem('courage-reward-v1') || 'null');
+    return !(r && Array.isArray(r.claimed) && r.claimed.includes(`${state.seed}:${state.target}`));
+  } catch (e) { return true; }
 }
 function renderStats() {
   const st = E.stats(state.history), max = Math.max(1, ...st.week.map((d) => d.add + d.shine));
@@ -332,6 +343,7 @@ function idleSay() {
   $('say').classList.remove('gold'); $('sayAction').hidden = true;
   const g = E.garland(lampsOn());
   let t;
+  if (rewardWaiting()) { t = '🎁 城堡完成了！按右上角的禮物，去寶庫打開寶箱。'; $('sayText').textContent = t; return; }
   if (state.finalized) t = '👑 這是你親手建成的勇氣王國。';
   else if (!V.built.length) t = '🧱 完成第一題，砌下第一塊積木吧！';
   else if (!V.complete) t = `🗺️ 「＋」就是下一塊積木的位置，還差 ${state.target - V.built.length} 塊。`;
@@ -371,7 +383,7 @@ function doAction(evt) {
   setTimeout(() => {
     newest = ''; newWindow = ''; newLamp = -1; busy = false; render();
     if (evt.type === 'shine') celebrateShine(evt.id);
-    else if (evt.type === 'add' && V.complete) fireworks('castle');
+    else if (evt.type === 'add' && V.complete) { if (rewardWaiting()) say('🎁 城堡完成了！你得到一次寶庫抽獎機會。', { gold: true, stay: true, action: ['🎁 去寶庫', () => { location.href = 'reward.html'; }] }); fireworks('castle'); }
     else if (evt.type === 'extra' && V.extra.length % 20 === 0) say('🎉 一個新區域建成了！', { gold: true });
   }, reduced.matches ? 80 : 760);
 }
@@ -585,6 +597,7 @@ function castleDialog() {
   dialog(`<div class="dialog-art">🎊🏰</div><div class="success-tag">✦ 原定目標，完成了！ ✦</div>
  <h2>${esc(state.name)}，勇氣城堡建成了！</h2>
  <p>你完成了 <b>${state.target}</b> 題，亮起 <b>${lampsOn()}</b> 盞勇氣燈。<br>現在可以欣賞成果，也可以自願繼續挑戰。</p>
+ ${rewardWaiting() ? '<a class="reward-cta" id="goReward" href="reward.html">🎁 你得到一次寶庫抽獎機會！<b>去打開寶箱</b></a>' : ''}
  <div class="dialog-actions"><button class="minor-action" id="rest">🌙 今天完成了</button><button class="primary" id="more">🌱 繼續挑戰！</button></div>`);
   $('rest').onclick = () => { closeDialog(); say('今天的努力非常棒，隨時都可以再回來！', { gold: true }); };
   $('more').onclick = themeDialog;
